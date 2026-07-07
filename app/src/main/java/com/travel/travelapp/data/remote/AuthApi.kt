@@ -1,28 +1,15 @@
 package com.travel.travelapp.data.remote
 
-import kotlinx.serialization.Serializable
+import com.travel.travelapp.data.remote.dto.AuthRequest
+import com.travel.travelapp.data.remote.dto.AuthResponse
+import com.travel.travelapp.data.remote.dto.UserRequest
 import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthApi {
-    @POST("/api/auth/login")
+    @POST("api/auth/login")
     suspend fun login(@Body request: AuthRequest): AuthResponse
 
-    @POST("/api/auth/register")
-    suspend fun register(@Body request: AuthRequest): AuthResponse
-
-    // TODO: Add other auth related endpoints here
+    @POST("api/auth/register")
+    suspend fun register(@Body request: UserRequest): AuthResponse
 }
-
-@Serializable
-data class AuthRequest(
-    val email: String,
-    val password: String
-)
-
-@Serializable
-data class AuthResponse(
-    val id: Long,
-    val email: String,
-    val token: String
-)
