@@ -1,9 +1,11 @@
 package com.travel.travelapp.data.repository
 
 import com.travel.travelapp.data.local.DataStoreManager
+import com.travel.travelapp.data.mapper.toDomain
 import com.travel.travelapp.data.remote.ApiService
+import com.travel.travelapp.data.remote.dto.TripRequest
+import com.travel.travelapp.domain.model.Trip
 import com.travel.travelapp.domain.repository.TravelRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,15 +15,53 @@ class TravelRepositoryImpl @Inject constructor(
     private val dataStoreManager: DataStoreManager
 ) : TravelRepository {
 
-    override suspend fun fetchData(): String {
-        return apiService.getExampleData()
+    override suspend fun getTrips(): Result<List<Trip>> {
+        return try {
+            val response = apiService.getTrips()
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    //.authToken - example Flow
-    override val exampleData: Flow<String?> = dataStoreManager.authToken
+    override suspend fun getTrip(id: Long): Result<Trip> {
+        return try {
+            val response = apiService.getTrip(id)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
-    //.saveAuthToken(value) - save example string(value)
-    override suspend fun saveToDataStore(value: String) {
-        dataStoreManager.saveAuthToken(value)
+    // TODO: Implement createTrip(trip: TripRequest)
+    override suspend fun createTrip(trip: TripRequest): Result<Trip> {
+        return try {
+            val response = apiService.createTrip(trip)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    // TODO: Implement updateTrip(id: Long, trip: TripRequest)
+    override suspend fun updateTrip(id: Long, trip: TripRequest): Result<Trip> {
+        return try {
+            val response = apiService.updateTrip(id, trip)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    // TODO: Implement deleteTrip(id: Long)
+    override suspend fun deleteTrip(id: Long): Result<Unit> {
+        return try {
+            val response = apiService.deleteTrip(id)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to delete trip"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
