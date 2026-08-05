@@ -1,13 +1,8 @@
-Here would be all repositories:
+# Repositories Implementation Status
 
-AuthRepository
-
-TravelRepository
-
-BudgetRepository
-
-ItineraryRepository
-
-PackingRepository
-
-DocumentRepository
+- [x] **AuthRepository** (Implemented: Login, Register, Token storage)
+- [ ] **TravelRepository** (Planned: All trips management)
+- [ ] **BudgetRepository** (Planned: Trip budget & expenses)
+- [ ] **ItineraryRepository** (Planned: Daily schedules)
+- [ ] **PackingRepository** (Planned: Checklists)
+- [ ] **DocumentRepository** (Planned: Travel documents)
