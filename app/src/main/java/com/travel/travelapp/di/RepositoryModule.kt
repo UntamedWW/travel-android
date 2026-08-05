@@ -1,7 +1,7 @@
 package com.travel.travelapp.di
 
-import com.travel.travelapp.data.repository.TravelRepositoryImpl
-import com.travel.travelapp.domain.repository.TravelRepository
+import com.travel.travelapp.data.repository.*
+import com.travel.travelapp.domain.repository.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,7 +14,37 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindAuthRepository(
+        authRepositoryImpl: AuthRepositoryImpl
+    ): AuthRepository
+
+    @Binds
+    @Singleton
     abstract fun bindTravelRepository(
         travelRepositoryImpl: TravelRepositoryImpl
     ): TravelRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBudgetRepository(
+        budgetRepositoryImpl: BudgetRepositoryImpl
+    ): BudgetRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindItineraryRepository(
+        itineraryRepositoryImpl: ItineraryRepositoryImpl
+    ): ItineraryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPackingRepository(
+        packingRepositoryImpl: PackingRepositoryImpl
+    ): PackingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDocumentRepository(
+        documentRepositoryImpl: DocumentRepositoryImpl
+    ): DocumentRepository
 }
