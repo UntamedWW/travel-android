@@ -81,7 +81,7 @@ fun TripsScreen(
                         items(uiState.trips) { trip ->
                             TripItem(
                                 trip = trip,
-                                onClick = { onNavigateToNavigateToTripDetails(trip.id) })
+                                onClick = { onNavigateToTripDetails(trip.id) })
                         }
                     }
                 }
@@ -90,8 +90,6 @@ fun TripsScreen(
     }
 }
 
-// Helper to avoid build error if used in a specific way, but the parameter name is onNavigateToTripDetails
-private fun onNavigateToNavigateToTripDetails(id: Long) {}
 
 @Composable
 fun TripItem(
