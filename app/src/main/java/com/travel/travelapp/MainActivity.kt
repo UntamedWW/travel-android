@@ -6,11 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,6 +21,8 @@ import androidx.navigation.compose.rememberNavController
 import com.travel.travelapp.screen.auth.AuthViewModel
 import com.travel.travelapp.screen.auth.LoginScreen
 import com.travel.travelapp.screen.auth.RegisterScreen
+import com.travel.travelapp.screen.home.HomeScreen
+import com.travel.travelapp.screen.trips.TripsScreen
 import com.travel.travelapp.ui.theme.TravelAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -65,7 +70,19 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("login") {
                                     popUpTo("home") { inclusive = true }
                                 }
-                            })
+                            },
+                                onNavigateToTrips = { navController.navigate("trips")}
+                            )
+                        }
+
+                        composable("trips"){
+                            TripsScreen( onNavigateToTripDetails = { tripId ->
+                                navController.navigate("trip_details/$tripId")
+                            },
+                                onAddTrip = {
+                                    navController.navigate("add_trip")
+                                }
+                            )
                         }
                     }
                 }
@@ -74,16 +91,32 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
-fun HomeScreenPlaceholder(onLogout: () -> Unit) {
+fun HomeScreenPlaceholder(onLogout: () -> Unit,
+                          onNavigateToTrips: () -> Unit) {
     androidx.compose.foundation.layout.Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
     ) {
-        androidx.compose.material3.Text(text = "Home Screen - You are logged in!")
-        androidx.compose.material3.Button(onClick = onLogout) {
-            androidx.compose.material3.Text("Logout")
+        Text(text = "Home Screen - You are logged in!")
+        Button(onClick = onLogout) {
+            Text("Logout")
         }
+        Button(onClick = onNavigateToTrips) {
+            Text("View my trips")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    TravelAppTheme {
+        HomeScreenPlaceholder(
+            onLogout = {},
+            onNavigateToTrips = {}
+        )
     }
 }
