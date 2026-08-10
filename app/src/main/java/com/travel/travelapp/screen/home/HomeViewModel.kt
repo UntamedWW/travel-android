@@ -18,7 +18,7 @@ data class HomeUiState(
     val nearestTrip: Trip? = null,
     val error: String? = null,
     val daysUntilTrip: Int? = null
-    )
+)
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -34,10 +34,17 @@ class HomeViewModel @Inject constructor(
     private fun loadNearestTrip() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            val result = tripRepository.getTrips()
+            tripRepository.getTrips()
                 .onSuccess { trips ->
-                    val nearest = trips.minByOrNull { it.startDate }
-                    val days = nearest?.let{
+                    val today = LocalDate.now()
+                    val nearest = trips
+                        .filter { trip ->
+                            // Залишаємо подорож, якщо вона ще не закінчилася
+                            !trip.endDate.isBefore(today)
+                        }
+                        .minByOrNull { it.startDate }
+                    
+                    val days = nearest?.let {
                         daysUntilTrip(it.startDate)
                     }
 
@@ -48,22 +55,16 @@ class HomeViewModel @Inject constructor(
                     ) }
                 }
                 .onFailure { exception ->
-                    _uiState.update {it.copy(
+                    _uiState.update { it.copy(
                         isLoading = false,
                         error = exception.message ?: "Unknown error"
-                    )}
+                    ) }
                 }
         }
     }
 
-    private fun daysUntilTrip(startDay: String): Int {
-        return try {
-            val start = LocalDate.parse(startDay)
-            val today = LocalDate.now()
-            ChronoUnit.DAYS.between(today, start).toInt()
-        } catch (e: Exception) {
-            0
-        }
+    private fun daysUntilTrip(startDate: LocalDate): Int {
+        val today = LocalDate.now()
+        return ChronoUnit.DAYS.between(today, startDate).toInt()
     }
-
 }
