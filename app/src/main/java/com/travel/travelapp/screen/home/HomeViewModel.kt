@@ -9,12 +9,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 data class HomeUiState(
     val isLoading: Boolean = false,
     val nearestTrip: Trip? = null,
-    val error: String? = null
+    val error: String? = null,
+    val daysUntilTrip: Int? = null
     )
 
 @HiltViewModel
@@ -29,16 +32,19 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun loadNearestTrip() {
-        // TODO: Implement loadNearestTrip()
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             val result = tripRepository.getTrips()
                 .onSuccess { trips ->
                     val nearest = trips.minByOrNull { it.startDate }
+                    val days = nearest?.let{
+                        daysUntilTrip(it.startDate)
+                    }
 
                     _uiState.update { it.copy(
                         isLoading = false,
-                        nearestTrip = nearest
+                        nearestTrip = nearest,
+                        daysUntilTrip = days
                     ) }
                 }
                 .onFailure { exception ->
@@ -47,6 +53,16 @@ class HomeViewModel @Inject constructor(
                         error = exception.message ?: "Unknown error"
                     )}
                 }
+        }
+    }
+
+    private fun daysUntilTrip(startDay: String): Int {
+        return try {
+            val start = LocalDate.parse(startDay)
+            val today = LocalDate.now()
+            ChronoUnit.DAYS.between(today, start).toInt()
+        } catch (e: Exception) {
+            0
         }
     }
 
