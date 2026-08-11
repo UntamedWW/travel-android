@@ -168,7 +168,7 @@ fun HomeScreenPlaceholder(
         HomeScreenContent (
             uiState = com.travel.travelapp.screen.home.HomeUiState(
                 isLoading = false,
-                nearestTrip = null,
+                nearestTrips = emptyList(),
                 error = null
             ),
             onLogout = onLogout,
