@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 data class HomeUiState(
     val isLoading: Boolean = false,
-    val nearestTrip: Trip? = null,
+    val nearestTrips: List<Trip> = emptyList(),
     val error: String? = null,
     val daysUntilTrip: Int? = null
 )
@@ -37,20 +37,19 @@ class HomeViewModel @Inject constructor(
             tripRepository.getTrips()
                 .onSuccess { trips ->
                     val today = LocalDate.now()
-                    val nearest = trips
-                        .filter { trip ->
-                            // Залишаємо подорож, якщо вона ще не закінчилася
-                            !trip.endDate.isBefore(today)
-                        }
-                        .minByOrNull { it.startDate }
+                    val upcoming = trips
+                        .filter { !it.endDate.isBefore(today) }
+                        .sortedBy { it.startDate }
+                        .take(3)
                     
-                    val days = nearest?.let {
+                    // Рахуємо дні для найближчої поїздки
+                    val days = upcoming.firstOrNull()?.let {
                         daysUntilTrip(it.startDate)
                     }
 
                     _uiState.update { it.copy(
                         isLoading = false,
-                        nearestTrip = nearest,
+                        nearestTrips = upcoming,
                         daysUntilTrip = days
                     ) }
                 }
