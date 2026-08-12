@@ -17,11 +17,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,7 +31,7 @@ import com.travel.travelapp.screen.auth.AuthViewModel
 import com.travel.travelapp.screen.auth.LoginScreen
 import com.travel.travelapp.screen.auth.RegisterScreen
 import com.travel.travelapp.screen.home.HomeScreen
-import com.travel.travelapp.screen.home.HomeScreenContent
+import com.travel.travelapp.screen.trips.TripDetailsScreen
 import com.travel.travelapp.screen.trips.TripsScreen
 import com.travel.travelapp.ui.theme.TravelAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
             TravelAppTheme {
                 val navController = rememberNavController()
                 val authViewModel: AuthViewModel = hiltViewModel()
-                val uiState by authViewModel.uiState.collectAsState()
+                val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -105,6 +105,12 @@ class MainActivity : ComponentActivity() {
                                 onAddTrip = {
                                     navController.navigate("add_trip")
                                 }
+                            )
+                        }
+
+                        composable("trips/{tripId}") {
+                            TripDetailsScreen(
+                                viewModel = hiltViewModel()
                             )
                         }
                     }

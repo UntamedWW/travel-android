@@ -66,6 +66,15 @@ class TripDetailsViewModel @Inject constructor(
         }
     }
 
+    fun onTabSelected(index: Int){
+        when (index) {
+            0 -> loadPackingList()
+            1 -> loadItinerary()
+            2 -> loadBudget()
+            3 -> loadDocuments()
+        }
+    }
+
     fun loadPackingList() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
