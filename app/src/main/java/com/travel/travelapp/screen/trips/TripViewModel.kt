@@ -31,19 +31,16 @@ class TripViewModel @Inject constructor(
 
     fun loadTrips() {
         viewModelScope.launch {
-            // 1. Починаємо завантаження
             _uiState.update { it.copy(isLoading = true, error = null) }
             
             val result = tripRepository.getTrips()
             
             result.onSuccess { fetchedTrips ->
-                // 2. Зберігаємо отриманий список у стан
                 _uiState.update { it.copy(
                     isLoading = false, 
                     trips = fetchedTrips 
                 ) }
             }.onFailure { e ->
-                // 3. Якщо помилка — записуємо її і очищаємо список (за бажанням)
                 _uiState.update { it.copy(
                     isLoading = false, 
                     error = e.message ?: "Unknown error",

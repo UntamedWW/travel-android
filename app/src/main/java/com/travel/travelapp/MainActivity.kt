@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import com.travel.travelapp.screen.auth.AuthViewModel
 import com.travel.travelapp.screen.auth.LoginScreen
 import com.travel.travelapp.screen.auth.RegisterScreen
+import com.travel.travelapp.screen.home.HomeScreen
 import com.travel.travelapp.screen.home.HomeScreenContent
 import com.travel.travelapp.screen.trips.TripsScreen
 import com.travel.travelapp.ui.theme.TravelAppTheme
@@ -165,12 +166,7 @@ fun HomeScreenPlaceholder(
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
     ) {
-        HomeScreenContent (
-            uiState = com.travel.travelapp.screen.home.HomeUiState(
-                isLoading = false,
-                nearestTrips = emptyList(),
-                error = null
-            ),
+        HomeScreen (
             onLogout = onLogout,
             onNavigateToTrips = onNavigateToTrips,
             onNavigateToTripDetails = onNavigateToTripDetails,
