@@ -4,8 +4,8 @@ import android.os.BugreportManager
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.travel.travelapp.domain.model.Budget
 import com.travel.travelapp.domain.model.Document
+import com.travel.travelapp.domain.model.Expense
 import com.travel.travelapp.domain.model.ItineraryItem
 import com.travel.travelapp.domain.model.PackingItem
 import com.travel.travelapp.domain.model.Trip
@@ -23,7 +23,9 @@ data class TripDetailsUiState(
     val trip: Trip? = null,
     val packingList: List<PackingItem> = emptyList(),
     val itineraryList: List<ItineraryItem> = emptyList(),
-    val budget: Budget? = null,
+    val plannedBudget: Double = 0.0,
+    val expensesList: List<Expense> = emptyList(),
+    val expensesTotal: Double = 0.0,
     val documentsList: List<Document> = emptyList(),
 )
 
@@ -132,13 +134,14 @@ class TripDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            val result = tripRepository.getBudget(id)
+            val budgetResult = tripRepository.getPlannedBudget(id)
+            val expensesResult = tripRepository.getExpensesList(id)
 
-            result.onSuccess { amount ->
+            budgetResult.onSuccess { amount ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        budget = amount
+                        plannedBudget = amount
                     )
                 }
             }
@@ -148,11 +151,48 @@ class TripDetailsViewModel @Inject constructor(
                         it.copy(
                             error = exception.message ?: "Unknown error",
                             isLoading = false,
-                            budget = null
+                            plannedBudget = 0.0
                         )
                     }
                 }
 
+            expensesResult.onSuccess { expenses ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        expensesTotal = expenses.sumOf { it.amount },
+                        expensesList = expenses
+                    )
+                }
+            }
+
+            .onFailure { exception ->
+                _uiState.update {
+                    it.copy(
+                        error = exception.message ?: "Unknown error",
+                        isLoading = false,
+                        expensesTotal = 0.0,
+                        expensesList = emptyList()
+                    )
+                }
+            }
+        }
+    }
+
+    fun addExpense(name: String, amount: Double){
+        viewModelScope.launch {
+            val newExpense = Expense(
+                id = 0L,
+                tripId = id,
+                name = name,
+                amount = amount,
+                date = java.time.LocalDate.now(),
+                )
+            val result = tripRepository.addExpense(tripId = id, newExpense)
+
+            if(result.isSuccess) {
+                loadBudget()
+            }
         }
     }
 
@@ -170,14 +210,25 @@ class TripDetailsViewModel @Inject constructor(
                     )
                 }
             }
-                .onFailure { exception ->
-                    _uiState.update {
-                        it.copy(
-                            error = exception.message ?: "Unknown error",
-                            isLoading = false
-                        )
-                    }
+            .onFailure { exception ->
+                _uiState.update {
+                    it.copy(
+                        error = exception.message ?: "Unknown error",
+                        isLoading = false
+                    )
                 }
+            }
+        }
+    }
+
+    fun togglePackingItem(item: PackingItem) {
+        viewModelScope.launch {
+            val updatedItem = item.copy(packed = !item.packed)
+            val result = tripRepository.updatePackingItem(updatedItem)
+
+            if(result.isSuccess) {
+                loadPackingList()
+            }
         }
     }
 }

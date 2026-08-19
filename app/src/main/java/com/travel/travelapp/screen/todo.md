@@ -1,5 +1,9 @@
 # Project Status & Tasks
 
+Main focus:
+- change Budget to Expense (front and back), 
+- add plannedBudget as property of Trip
+
 ## Today's Focus
 - [ ] **Repository Layer Implementation**
     - [ ] Create `AuthRepository` (Handle login/register logic & token saving).

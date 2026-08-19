@@ -10,9 +10,12 @@ data class Trip(
     val endDate: LocalDate,
     val totalTasks: Int = 0,
     val completedTasks: Int = 0,
-    val expectedBudget: Double = 0.0,
-    val spentBudget: Double = 0.0
+    val plannedBudget: Double = 0.0,
+    val totalExpenses: Double = 0.0
 ) {
     val preparationProgress: Float
         get() = if (totalTasks > 0) completedTasks.toFloat() / totalTasks else 0f
+
+    val remainingBudget: Double
+        get() = plannedBudget - totalExpenses
 }

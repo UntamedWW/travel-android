@@ -80,8 +80,8 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("home") {
-                            // Temporary placeholder for HomeScreen
-                            HomeScreenPlaceholder(
+                            HomeScreen(
+                                viewModel = hiltViewModel(),
                                 onLogout = {
                                     authViewModel.logout()
                                     navController.navigate("login") {
@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToTrips = { navController.navigate("trips")},
                                 onNavigateToTripDetails = { tripId ->
-                                    navController.navigate("trip_details/$tripId")
+                                    navController.navigate("trips/$tripId")
                                 },
                                 onAddTrip = {
                                     navController.navigate("add_trip")
@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
 
                         composable("trips"){
                             TripsScreen( onNavigateToTripDetails = { tripId ->
-                                navController.navigate("trip_details/$tripId")
+                                navController.navigate("trips/$tripId")
                             },
                                 onAddTrip = {
                                     navController.navigate("add_trip")
@@ -122,7 +122,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun BottomNavigationBar(navController: androidx.navigation.NavHostController) {
-    val items = listOf("home", "trips", "profile") // Наші маршрути
+    val items = listOf("home", "trips", "profile")
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 

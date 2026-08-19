@@ -4,6 +4,10 @@ import com.travel.travelapp.data.local.DataStoreManager
 import com.travel.travelapp.data.mapper.toDomain
 import com.travel.travelapp.data.remote.ApiService
 import com.travel.travelapp.data.remote.dto.TripRequest
+import com.travel.travelapp.domain.model.Document
+import com.travel.travelapp.domain.model.Expense
+import com.travel.travelapp.domain.model.ItineraryItem
+import com.travel.travelapp.domain.model.PackingItem
 import com.travel.travelapp.domain.model.Trip
 import com.travel.travelapp.domain.repository.TravelRepository
 import javax.inject.Inject
@@ -32,6 +36,32 @@ class TravelRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun getPackingList(tripId: Long): Result<List<PackingItem>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getItineraryList(tripId: Long): Result<List<ItineraryItem>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getDocumentsList(tripId: Long): Result<List<Document>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getPlannedBudget(tripId: Long): Result<Double> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getExpensesList(tripId: Long): Result<List<Expense>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun addExpense(tripId: Long, expense: Expense): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
+
 
     // TODO: Implement createTrip(trip: TripRequest)
     override suspend fun createTrip(trip: TripRequest): Result<Trip> {
@@ -63,5 +93,9 @@ class TravelRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun updatePackingItem(item: PackingItem): Result<Unit> {
+        TODO("Not yet implemented")
     }
 }
