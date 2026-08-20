@@ -49,7 +49,7 @@ class TravelRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getItineraryList(tripId: Long): Result<List<ItineraryItem>> {
-        return try{
+        return try {
             val response = apiService.getItineraryItemsByTrip(tripId)
             Result.success(response.map { it.toDomain() })
         } catch (e: Exception) {
@@ -58,7 +58,7 @@ class TravelRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getDocumentsList(tripId: Long): Result<List<Document>> {
-        return try{
+        return try {
             val response = apiService.getDocuments(tripId)
             Result.success(response.map { it.toDomain() })
         } catch (e: Exception) {
@@ -68,9 +68,8 @@ class TravelRepositoryImpl @Inject constructor(
 
     override suspend fun getPlannedBudget(tripId: Long): Result<Double> {
         return try {
-            val response = apiService.getExpenses(tripId)
-            val plannedBudget = response.sumOf { it.amount }
-            Result.success(plannedBudget)
+            val response = apiService.getTrip(tripId)
+            Result.success(response.plannedBudget)
         } catch (e: Exception) {
             Result.failure(e)
         }
