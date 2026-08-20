@@ -115,7 +115,9 @@ fun PackingListContent(
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(items, key = { it.id }) { item ->
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .clickable{ onTogglePackingItem(item) }
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                     Text(
@@ -147,8 +149,49 @@ fun PackingListContentPreview() {
 }
 
 @Composable
-fun ItineraryContent(state: List<ItineraryItem>) {
-    // TODO: Напиши список справ, використовуючи state.itineraryList
+fun ItineraryContent(
+    items: List<ItineraryItem>,
+    onAddItem: () -> Unit = {}
+) {
+       val groupedItems = remember(items) {
+        items.groupBy {
+            LocalDate.parse(it.startDateTime.substring(0, 10))
+        }.toSortedMap()
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(16.dp)
+    ) {
+        val formatter = DateTimeFormatter.ofPattern("d MMMM", Locale.getDefault())
+
+        groupedItems.forEach { (date, itemsForDate) ->
+            item {
+                Text(
+                    text = date.format(formatter),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            items(itemsForDate.sortedBy { it.exactTime }) { item ->
+                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                    Text(text = "${item.exactTime ?: "--:--"} - ${item.name}")
+                    if (!item.description.isNullOrBlank()) {
+                        Text(text = item.description)
+                    }
+                }
+            }
+        }
+
+        // TODO: В майбутньому ми винесемо цю кнопку в FloatingActionButton всередині Scaffold,
+        item {
+            Button(
+                onClick = onAddItem,
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+            }
+        }
+    }
 }
 
 @Composable
