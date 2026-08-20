@@ -29,16 +29,16 @@ interface ApiService {
 
     // --- Itinerary ---
     @GET("api/itinerary-items/trip/{tripId}")
-    suspend fun getItemsByTrip(@Path("tripId") tripId: Long): List<ItineraryItemResponse>
+    suspend fun getItineraryItemsByTrip(@Path("tripId") tripId: Long): List<ItineraryItemResponse>
 
     @POST("api/itinerary-items")
-    suspend fun createItem(@Body request: ItineraryItemRequest): ItineraryItemResponse
+    suspend fun createItineraryItem(@Body request: ItineraryItemRequest): ItineraryItemResponse
 
     @PUT("api/itinerary-items/{id}")
-    suspend fun updateItem(@Path("id") id: Long, @Body request: ItineraryItemRequest): ItineraryItemResponse
+    suspend fun updateItineraryItem(@Path("id") id: Long, @Body request: ItineraryItemRequest): ItineraryItemResponse
 
     @DELETE("api/itinerary-items/{id}")
-    suspend fun deleteItem(@Path("id") id: Long): Response<Unit>
+    suspend fun deleteItineraryItem(@Path("id") id: Long): Response<Unit>
 
     // --- Expenses ---
     @GET("api/expenses/trip/{tripId}")

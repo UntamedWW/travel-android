@@ -1,5 +1,6 @@
 package com.travel.travelapp.data.mapper
 
+import com.travel.travelapp.data.remote.dto.ExpenseRequest
 import com.travel.travelapp.data.remote.dto.ExpenseResponse
 import com.travel.travelapp.domain.model.Expense
 import java.time.LocalDate
@@ -11,5 +12,14 @@ fun ExpenseResponse.toDomain(): Expense {
         amount = amount,
         date = LocalDate.parse(date),
         tripId = tripId
+    )
+}
+
+fun Expense.toRequest(): ExpenseRequest {
+    return ExpenseRequest(
+        name = name,
+        amount = amount,
+        tripId = tripId,
+        date = date.toString()
     )
 }

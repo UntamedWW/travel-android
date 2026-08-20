@@ -3,6 +3,8 @@ package com.travel.travelapp.data.repository
 import com.travel.travelapp.data.local.DataStoreManager
 import com.travel.travelapp.data.mapper.toDomain
 import com.travel.travelapp.data.remote.ApiService
+import com.travel.travelapp.data.remote.dto.ExpenseRequest
+import com.travel.travelapp.data.remote.dto.PackingItemRequest
 import com.travel.travelapp.data.remote.dto.TripRequest
 import com.travel.travelapp.domain.model.Document
 import com.travel.travelapp.domain.model.Expense
@@ -38,32 +40,60 @@ class TravelRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPackingList(tripId: Long): Result<List<PackingItem>> {
-        TODO("Not yet implemented")
+        return try {
+            val response = apiService.getPackingItems(tripId)
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun getItineraryList(tripId: Long): Result<List<ItineraryItem>> {
-        TODO("Not yet implemented")
+        return try{
+            val response = apiService.getItineraryItemsByTrip(tripId)
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun getDocumentsList(tripId: Long): Result<List<Document>> {
-        TODO("Not yet implemented")
+        return try{
+            val response = apiService.getDocuments(tripId)
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun getPlannedBudget(tripId: Long): Result<Double> {
-        TODO("Not yet implemented")
+        return try {
+            val response = apiService.getExpenses(tripId)
+            val plannedBudget = response.sumOf { it.amount }
+            Result.success(plannedBudget)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun getExpensesList(tripId: Long): Result<List<Expense>> {
-        TODO("Not yet implemented")
+        return try {
+            val response = apiService.getExpenses(tripId)
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    override suspend fun addExpense(tripId: Long, expense: Expense): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun addExpense(tripId: Long, expense: ExpenseRequest): Result<Unit> {
+        return try {
+            apiService.createExpense(expense)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-
-
-    // TODO: Implement createTrip(trip: TripRequest)
     override suspend fun createTrip(trip: TripRequest): Result<Trip> {
         return try {
             val response = apiService.createTrip(trip)
@@ -72,7 +102,7 @@ class TravelRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-    // TODO: Implement updateTrip(id: Long, trip: TripRequest)
+
     override suspend fun updateTrip(id: Long, trip: TripRequest): Result<Trip> {
         return try {
             val response = apiService.updateTrip(id, trip)
@@ -81,7 +111,7 @@ class TravelRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-    // TODO: Implement deleteTrip(id: Long)
+
     override suspend fun deleteTrip(id: Long): Result<Unit> {
         return try {
             val response = apiService.deleteTrip(id)
@@ -95,7 +125,12 @@ class TravelRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updatePackingItem(item: PackingItem): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun updatePackingItem(id: Long, item: PackingItemRequest): Result<Unit> {
+        return try {
+            apiService.updatePackingItem(id, item)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

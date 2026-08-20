@@ -1,5 +1,7 @@
 package com.travel.travelapp.domain.repository
 
+import com.travel.travelapp.data.remote.dto.ExpenseRequest
+import com.travel.travelapp.data.remote.dto.PackingItemRequest
 import com.travel.travelapp.data.remote.dto.TripRequest
 import com.travel.travelapp.domain.model.Document
 import com.travel.travelapp.domain.model.Expense
@@ -16,8 +18,8 @@ interface TravelRepository {
     suspend fun createTrip(trip: TripRequest): Result<Trip>
     suspend fun updateTrip(id: Long, trip: TripRequest): Result<Trip>
     suspend fun deleteTrip(id: Long): Result<Unit>
-    suspend fun updatePackingItem(item: PackingItem): Result<Unit>
+    suspend fun updatePackingItem(id: Long, item: PackingItemRequest): Result<Unit>
     suspend fun getPlannedBudget(tripId: Long): Result<Double>
     suspend fun getExpensesList(tripId: Long): Result<List<Expense>>
-    suspend fun addExpense(tripId: Long, expense: Expense): Result<Unit>
+    suspend fun addExpense(tripId: Long, expense: ExpenseRequest): Result<Unit>
 }
