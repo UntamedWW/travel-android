@@ -9,5 +9,7 @@ data class TripResponse(
     val destination: String,
     val startDate: String, // LocalDate as "yyyy-MM-dd"
     val endDate: String,   // LocalDate as "yyyy-MM-dd"
-    val userId: Long
+    val userId: Long,
+    val plannedBudget: Double = 0.0,
+    val totalExpenses: Double = 0.0
 )

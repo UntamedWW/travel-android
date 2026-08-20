@@ -29,29 +29,29 @@ interface ApiService {
 
     // --- Itinerary ---
     @GET("api/itinerary-items/trip/{tripId}")
-    suspend fun getItemsByTrip(@Path("tripId") tripId: Long): List<ItineraryItemResponse>
+    suspend fun getItineraryItemsByTrip(@Path("tripId") tripId: Long): List<ItineraryItemResponse>
 
     @POST("api/itinerary-items")
-    suspend fun createItem(@Body request: ItineraryItemRequest): ItineraryItemResponse
+    suspend fun createItineraryItem(@Body request: ItineraryItemRequest): ItineraryItemResponse
 
     @PUT("api/itinerary-items/{id}")
-    suspend fun updateItem(@Path("id") id: Long, @Body request: ItineraryItemRequest): ItineraryItemResponse
+    suspend fun updateItineraryItem(@Path("id") id: Long, @Body request: ItineraryItemRequest): ItineraryItemResponse
 
     @DELETE("api/itinerary-items/{id}")
-    suspend fun deleteItem(@Path("id") id: Long): Response<Unit>
+    suspend fun deleteItineraryItem(@Path("id") id: Long): Response<Unit>
 
-    // --- Budget ---
-    @GET("api/budgets/trip/{tripId}")
-    suspend fun getBudgets(@Path("tripId") tripId: Long): List<BudgetResponse>
+    // --- Expenses ---
+    @GET("api/expenses/trip/{tripId}")
+    suspend fun getExpenses(@Path("tripId") tripId: Long): List<ExpenseResponse>
 
-    @POST("api/budgets")
-    suspend fun createBudget(@Body request: BudgetRequest): BudgetResponse
+    @POST("api/expenses")
+    suspend fun createExpense(@Body request: ExpenseRequest): ExpenseResponse
 
-    @PUT("api/budgets/{id}")
-    suspend fun updateBudget(@Path("id") id: Long, @Body request: BudgetRequest): BudgetResponse
+    @PUT("api/expenses/{id}")
+    suspend fun updateExpense(@Path("id") id: Long, @Body request: ExpenseRequest): ExpenseResponse
 
-    @DELETE("api/budgets/{id}")
-    suspend fun deleteBudget(@Path("id") id: Long): Response<Unit>
+    @DELETE("api/expenses/{id}")
+    suspend fun deleteExpense(@Path("id") id: Long): Response<Unit>
 
     // --- Packing ---
     @GET("api/packing-items/trip/{tripId}")
