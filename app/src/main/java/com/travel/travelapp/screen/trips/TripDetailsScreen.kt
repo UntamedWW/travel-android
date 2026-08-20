@@ -44,6 +44,7 @@ fun TripDetailsScreen(
         state = uiState,
         tabIndex = selectedTabIndex,
         onTabClick = { index ->
+            selectedTabIndex = index
             viewModel.onTabSelected(index)
         },
         onTogglePackingItem = { item ->
