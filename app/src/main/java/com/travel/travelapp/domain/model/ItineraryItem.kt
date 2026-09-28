@@ -6,5 +6,5 @@ data class ItineraryItem(
     val description: String?,
     val location: String?,
     val startDateTime: String,
-    val endDateTime: String?
+    val exactTime: String?
 )

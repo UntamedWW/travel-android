@@ -1,9 +1,9 @@
 package com.travel.travelapp.screen.trips
 
-import android.os.BugreportManager
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.travel.travelapp.data.remote.dto.ExpenseRequest
 import com.travel.travelapp.domain.model.Document
 import com.travel.travelapp.domain.model.Expense
 import com.travel.travelapp.domain.model.ItineraryItem
@@ -181,12 +181,11 @@ class TripDetailsViewModel @Inject constructor(
 
     fun addExpense(name: String, amount: Double){
         viewModelScope.launch {
-            val newExpense = Expense(
-                id = 0L,
+            val newExpense = ExpenseRequest(
                 tripId = id,
                 name = name,
                 amount = amount,
-                date = java.time.LocalDate.now(),
+                date = java.time.LocalDate.now().toString(),
                 )
             val result = tripRepository.addExpense(tripId = id, newExpense)
 
@@ -224,10 +223,18 @@ class TripDetailsViewModel @Inject constructor(
     fun togglePackingItem(item: PackingItem) {
         viewModelScope.launch {
             val updatedItem = item.copy(packed = !item.packed)
-            val result = tripRepository.updatePackingItem(updatedItem)
+            val result = tripRepository.updatePackingItem(updatedItem.id, updatedItem)
 
-            if(result.isSuccess) {
+            result.onSuccess {
                 loadPackingList()
+            }
+            .onFailure { exception ->
+                _uiState.update {
+                    it.copy(
+                        error = exception.message ?: "Unknown error",
+                        isLoading = false
+                    )
+                }
             }
         }
     }

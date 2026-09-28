@@ -4,7 +4,6 @@ import com.travel.travelapp.data.local.DataStoreManager
 import com.travel.travelapp.data.mapper.toDomain
 import com.travel.travelapp.data.remote.ApiService
 import com.travel.travelapp.data.remote.dto.ExpenseRequest
-import com.travel.travelapp.data.remote.dto.PackingItemRequest
 import com.travel.travelapp.data.remote.dto.TripRequest
 import com.travel.travelapp.domain.model.Document
 import com.travel.travelapp.domain.model.Expense
@@ -124,7 +123,7 @@ class TravelRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updatePackingItem(id: Long, item: PackingItemRequest): Result<Unit> {
+    override suspend fun updatePackingItem(id: Long, item: PackingItem): Result<Unit> {
         return try {
             apiService.updatePackingItem(id, item)
             Result.success(Unit)

@@ -1,6 +1,7 @@
 package com.travel.travelapp.data.remote
 
 import com.travel.travelapp.data.remote.dto.*
+import com.travel.travelapp.domain.model.PackingItem
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -61,7 +62,7 @@ interface ApiService {
     suspend fun createPackingItem(@Body request: PackingItemRequest): PackingItemResponse
 
     @PUT("api/packing-items/{id}")
-    suspend fun updatePackingItem(@Path("id") id: Long, @Body request: PackingItemRequest): PackingItemResponse
+    suspend fun updatePackingItem(@Path("id") id: Long, @Body request: PackingItem): PackingItemResponse
 
     @PATCH("api/packing-items/{id}/packed")
     suspend fun togglePacked(@Path("id") id: Long, @Body request: PackingItemPackedRequest): PackingItemResponse

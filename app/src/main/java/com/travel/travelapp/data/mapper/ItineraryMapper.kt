@@ -10,6 +10,6 @@ fun ItineraryItemResponse.toDomain(): ItineraryItem {
         description = description,
         location = location,
         startDateTime = startDateTime,
-        endDateTime = endDateTime
+        exactTime = exactTime
     )
 }
