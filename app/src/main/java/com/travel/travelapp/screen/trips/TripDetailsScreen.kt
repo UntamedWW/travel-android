@@ -297,7 +297,16 @@ fun ExpenseContent(
 @Preview(showBackground = true)
 @Composable
 fun ExpenseContentPreview() {
-
+    ExpenseContent(
+        budget =  600.00,
+        list = listOf(
+            Expense(tripId = 0, id = 1, name = "test", date = LocalDate.parse("2002-01-01"), amount = 100.00),
+            Expense(tripId = 0, id = 2, name = "test number 2", date = LocalDate.parse("2002-02-01"), amount = 100.00),
+            Expense(tripId = 0, id = 3, name = "test number 3", date = LocalDate.parse("2002-03-01"), amount = 100.00),
+            Expense(tripId = 0, id = 4, name = "test number 4", date = LocalDate.parse("2002-04-01"), amount = 100.00)
+        ),
+        onAddItem = {}
+    )
 }
 
 @Composable

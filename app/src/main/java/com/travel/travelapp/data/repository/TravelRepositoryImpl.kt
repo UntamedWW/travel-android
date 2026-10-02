@@ -5,6 +5,7 @@ import com.travel.travelapp.data.mapper.toDomain
 import com.travel.travelapp.data.remote.ApiService
 import com.travel.travelapp.data.remote.dto.ExpenseRequest
 import com.travel.travelapp.data.remote.dto.TripRequest
+import com.travel.travelapp.data.remote.dto.TripResponse
 import com.travel.travelapp.domain.model.Document
 import com.travel.travelapp.domain.model.Expense
 import com.travel.travelapp.domain.model.ItineraryItem
