@@ -237,6 +237,8 @@ class TripDetailsViewModel @Inject constructor(
                 }
             }
         }
+
+
     }
 }
 

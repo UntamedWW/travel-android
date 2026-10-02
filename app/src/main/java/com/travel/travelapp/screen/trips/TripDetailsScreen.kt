@@ -1,11 +1,13 @@
 package com.travel.travelapp.screen.trips
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -29,12 +32,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.travel.travelapp.domain.model.Document
+import com.travel.travelapp.domain.model.Expense
 import com.travel.travelapp.domain.model.ItineraryItem
 import com.travel.travelapp.domain.model.PackingItem
 import com.travel.travelapp.domain.model.Trip
@@ -50,13 +55,13 @@ fun TripDetailsScreen(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     TripDetailsContent(
-        state = uiState,
-        tabIndex = selectedTabIndex,
+        state = uiState, 
+        tabIndex = selectedTabIndex, 
         onTabClick = { index ->
-            selectedTabIndex = index
-            viewModel.onTabSelected(index)
+            selectedTabIndex = index 
+            viewModel.onTabSelected(index) 
         },
-        onTogglePackingItem = { item ->
+        onTogglePackingItem = { item -> 
             viewModel.togglePackingItem(item)
         }
     )
@@ -106,7 +111,8 @@ fun TripDetailsContent(
                     when (tabIndex) {
                         0 -> PackingListContent(state.packingList, onTogglePackingItem)
                         1 -> ItineraryContent(state.itineraryList)
-                        2 -> ExpenseContent(state.plannedBudget)
+                        2 -> ExpenseContent(
+                            state.plannedBudget, state.expensesList, onAddItem = {} )
                         3 -> DocumentsContent(state.documentsList)
                     }
                 }
@@ -206,12 +212,92 @@ fun ItineraryContentPreview() {
 }
 
 @Composable
-fun ExpenseContent(expense: Double?) {
-    Column(
-        modifier = Modifier.padding(16.dp)
+fun ExpenseContent(
+    budget: Double,
+    list: List<Expense>,
+    onAddItem: () -> Unit = {}
     ) {
-        Text("Expenses feature coming soon", style = MaterialTheme.typography.bodyLarge)
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddItem) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add expense")
+            }
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp)
+            ) {
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth()
+                ) {
+                    val expensesSum = list.sumOf { it.amount }
+                    val remaining = budget - expensesSum;
+                    Column {
+                        Text(text = "Budget:", style = MaterialTheme.typography.labelSmall)
+                        Text(text = "%.2f".format(budget), style = MaterialTheme.typography.titleMedium)
+                    }
+                    Column {
+                        Text(text = "Expenses:", style = MaterialTheme.typography.labelSmall)
+                        Text(text =  "%.2f".format(expensesSum), style = MaterialTheme.typography.titleMedium)
+                    }
+                    Column {
+                        Text(text = "Remaining:", style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            text = "%.2f".format(remaining),
+                            color = if(remaining < 0) Color.Red else Color.Green,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+            }
+
+            items(list) { expense ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 7.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = expense.name,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+
+                        Text(
+                            text = "${expense.date}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+
+                        Text(
+                            text = "%.2f".format(expense.amount),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+            }
+
+        }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ExpenseContentPreview() {
+
 }
 
 @Composable
