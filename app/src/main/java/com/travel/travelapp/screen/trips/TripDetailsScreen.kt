@@ -63,6 +63,12 @@ fun TripDetailsScreen(
         },
         onTogglePackingItem = { item -> 
             viewModel.togglePackingItem(item)
+        },
+        onAddExpense = { item ->
+            viewModel.addExpense(item.name, item.amount)
+        },
+        onAddDocument = { item ->
+            viewModel.addDocument(item)
         }
     )
 }
@@ -73,7 +79,9 @@ fun TripDetailsContent(
     state: TripDetailsUiState,
     tabIndex: Int,
     onTabClick: (Int) -> Unit,
-    onTogglePackingItem: (PackingItem) -> Unit
+    onTogglePackingItem: (PackingItem) -> Unit,
+    onAddExpense: (Expense) -> Unit = {},
+    onAddDocument: (Document) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -112,8 +120,8 @@ fun TripDetailsContent(
                         0 -> PackingListContent(state.packingList, onTogglePackingItem)
                         1 -> ItineraryContent(state.itineraryList)
                         2 -> ExpenseContent(
-                            state.plannedBudget, state.expensesList, onAddItem = {} )
-                        3 -> DocumentsContent(state.documentsList)
+                            state.plannedBudget, state.expensesList, onAddExpense)
+                        3 -> DocumentsContent(state.documentsList, onAddDocument)
                     }
                 }
             }
@@ -135,7 +143,7 @@ fun PackingListContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                     Text(
-                        text = item.name,
+                        text = "${item.id + 1}. ${item.name}",
                         modifier = Modifier.padding(start = 8.dp)
                     )
 
@@ -148,6 +156,18 @@ fun PackingListContent(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PackingListPreview() {
+    PackingListContent(
+        listOf(
+            PackingItem(id = 0, name = "bag", packed = false),
+            PackingItem(id = 1, name = "pen", packed = true),
+        ),
+        onTogglePackingItem = {}
+    )
 }
 
 @Composable
@@ -208,19 +228,25 @@ fun ItineraryContent(
 @Preview(showBackground = true)
 @Composable
 fun ItineraryContentPreview() {
-
+    ItineraryContent(
+        items = listOf(
+            ItineraryItem(id = 0, name = "Church of Monica", startDateTime = LocalDate.parse("2002-02-01").toString(), description = "best place", location = "here", exactTime = LocalDate.parse("2002-02-01").toString()),
+            ItineraryItem(id = 0, name = "Eiphel Tower", startDateTime = LocalDate.parse("2002-01-01").toString(), description = "love it", location = "here", exactTime = LocalDate.parse("2002-01-01").toString()),
+            ItineraryItem(id = 0, name = "Big Ban", startDateTime = LocalDate.parse("2002-01-01").toString(), description = "better at night", location = "here", exactTime = LocalDate.parse("2002-01-01").toString())
+        )
+    )
 }
 
 @Composable
 fun ExpenseContent(
     budget: Double,
     list: List<Expense>,
-    onAddItem: () -> Unit = {}
+    onAddExpense: () -> Unit = {}
     ) {
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddItem) {
+            FloatingActionButton(onClick = onAddExpense) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add expense")
             }
         }
@@ -305,12 +331,15 @@ fun ExpenseContentPreview() {
             Expense(tripId = 0, id = 3, name = "test number 3", date = LocalDate.parse("2002-03-01"), amount = 100.00),
             Expense(tripId = 0, id = 4, name = "test number 4", date = LocalDate.parse("2002-04-01"), amount = 100.00)
         ),
-        onAddItem = {}
+        onAddExpense = {}
     )
 }
 
 @Composable
-fun DocumentsContent(items: List<Document>) {
+fun DocumentsContent(
+    items: List<Document>,
+    onAddDocument: () -> Unit = {}
+) {
     Text(text = "Документів: ${items.size}", modifier = Modifier.padding(16.dp))
 }
 

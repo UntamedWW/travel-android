@@ -65,7 +65,7 @@ interface ApiService {
     suspend fun updatePackingItem(@Path("id") id: Long, @Body request: PackingItem): PackingItemResponse
 
     @PATCH("api/packing-items/{id}/packed")
-    suspend fun togglePacked(@Path("id") id: Long, @Body request: PackingItemPackedRequest): PackingItemResponse
+    suspend fun togglePackedItem(@Path("id") id: Long, @Body request: PackingItemPackedRequest): PackingItemResponse
 
     @DELETE("api/packing-items/{id}")
     suspend fun deletePackingItem(@Path("id") id: Long): Response<Unit>

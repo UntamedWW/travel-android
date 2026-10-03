@@ -3,7 +3,9 @@ package com.travel.travelapp.data.repository
 import com.travel.travelapp.data.local.DataStoreManager
 import com.travel.travelapp.data.mapper.toDomain
 import com.travel.travelapp.data.remote.ApiService
+import com.travel.travelapp.data.remote.dto.DocumentRequest
 import com.travel.travelapp.data.remote.dto.ExpenseRequest
+import com.travel.travelapp.data.remote.dto.PackingItemRequest
 import com.travel.travelapp.data.remote.dto.TripRequest
 import com.travel.travelapp.data.remote.dto.TripResponse
 import com.travel.travelapp.domain.model.Document
@@ -39,6 +41,15 @@ class TravelRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun addPackingItem(tripId: Long, item: PackingItemRequest): Result<PackingItem> {
+        return try {
+            val response = apiService.createPackingItem(item)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun getPackingList(tripId: Long): Result<List<PackingItem>> {
         return try {
             val response = apiService.getPackingItems(tripId)
@@ -52,6 +63,15 @@ class TravelRepositoryImpl @Inject constructor(
         return try {
             val response = apiService.getItineraryItemsByTrip(tripId)
             Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addDocument(document: DocumentRequest): Result<Document> {
+        return try {
+            val response = apiService.createDocument(document)
+            Result.success(response.toDomain())
         } catch (e: Exception) {
             Result.failure(e)
         }
