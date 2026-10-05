@@ -1,37 +1,57 @@
 package com.travel.travelapp.screen.trips
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.travel.travelapp.domain.model.Document
+import com.travel.travelapp.domain.model.Expense
 import com.travel.travelapp.domain.model.ItineraryItem
 import com.travel.travelapp.domain.model.PackingItem
 import com.travel.travelapp.domain.model.Trip
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun TripDetailsScreen(
@@ -41,13 +61,20 @@ fun TripDetailsScreen(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     TripDetailsContent(
-        state = uiState,
-        tabIndex = selectedTabIndex,
+        state = uiState, 
+        tabIndex = selectedTabIndex, 
         onTabClick = { index ->
-            viewModel.onTabSelected(index)
+            selectedTabIndex = index 
+            viewModel.onTabSelected(index) 
         },
-        onTogglePackingItem = { item ->
+        onTogglePackingItem = { item -> 
             viewModel.togglePackingItem(item)
+        },
+        onAddExpense = { name, amount ->
+            viewModel.addExpense(name, amount)
+        },
+        onAddDocument = { item ->
+            viewModel.addDocument(item)
         }
     )
 }
@@ -58,8 +85,22 @@ fun TripDetailsContent(
     state: TripDetailsUiState,
     tabIndex: Int,
     onTabClick: (Int) -> Unit,
-    onTogglePackingItem: (PackingItem) -> Unit
+    onTogglePackingItem: (PackingItem) -> Unit,
+    onAddExpense: (String, Double) -> Unit,
+    onAddDocument: (Document) -> Unit
 ) {
+
+    var showExpenseDialog by remember { mutableStateOf(false) }
+
+    if (showExpenseDialog) {
+        AddExpenseDialog(
+            onDismiss = {showExpenseDialog = false},
+            onConfirm = { name, amount ->
+                onAddExpense(name, amount)
+                showExpenseDialog = false
+            }
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -94,17 +135,17 @@ fun TripDetailsContent(
                     }
 
                     when (tabIndex) {
-                        0 -> PackingListContent(items = state.packingList, onTogglePackingItem = onTogglePackingItem)
+                        0 -> PackingListContent(state.packingList, onTogglePackingItem)
                         1 -> ItineraryContent(state.itineraryList)
-                        2 -> ExpenseContent(state.plannedBudget)
-                        3 -> DocumentsContent(state.documentsList)
+                        2 -> ExpenseContent(
+                            state.plannedBudget, state.expensesList, onAddExpense = { showExpenseDialog = true })
+                        3 -> DocumentsContent(state.documentsList, onAddDocument = {})
                     }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun PackingListContent(
@@ -114,16 +155,21 @@ fun PackingListContent(
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(items, key = { it.id }) { item ->
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .clickable{ onTogglePackingItem(item) }
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                     Text(
-                        text = item.name,
+                        text = "${item.id + 1}. ${item.name}",
                         modifier = Modifier.padding(start = 8.dp)
                     )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
                     Checkbox(
                         checked = item.packed,
-                        onCheckedChange = { onTogglePackingItem(item) }
+                        onCheckedChange = null
                     )
             }
         }
@@ -132,57 +178,186 @@ fun PackingListContent(
 
 @Preview(showBackground = true)
 @Composable
-fun PackingListContentPreview() {
-    val fakeState = TripDetailsUiState(
-        // Fixed: Changed date format from "dd/MM/yyyy" to ISO-8601 "yyyy-MM-dd" for LocalDate.parse
-        trip = Trip(id = 1, title = "Відпустка у Парижі", destination = "Париж", startDate = LocalDate.parse("2025-02-02"), endDate = LocalDate.parse("2025-03-03")),
-        isLoading = false,
-        packingList = listOf(
-            PackingItem(id = 1, name = "Палатка", packed = false),
-            PackingItem(id = 2, name = "Кросівки", packed = true)
-        )
+fun PackingListPreview() {
+    PackingListContent(
+        listOf(
+            PackingItem(id = 0, name = "bag", packed = false),
+            PackingItem(id = 1, name = "pen", packed = true),
+        ),
+        onTogglePackingItem = {}
     )
-    PackingListContent(items = fakeState.packingList, onTogglePackingItem = {})
 }
 
 @Composable
-fun ItineraryContent(state: List<ItineraryItem>) {
-    // TODO: Напиши список справ, використовуючи state.itineraryList
-}
+fun ItineraryContent(
+    items: List<ItineraryItem>,
+    onAddItem: () -> Unit = {}
+) {
+   val groupedItems = remember(items) {
+        items.groupBy {
+            LocalDate.parse(it.startDateTime.substring(0, 10))
+        }.toSortedMap()
+   }
+    
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddItem) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "Додати подію")
+            }
+        }
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
+        ) {
+            val formatter = DateTimeFormatter.ofPattern("d MMMM", Locale.getDefault())
 
-@Composable
-fun ExpenseContent(expense: Double?) {
-    // TODO:
-    //  Summary card: "Planned", "Spent", "Remaining"
-    //  History List: sorted by date transactions
-    //  Add/Edit buttons (+delete near each transaction)
+            groupedItems.forEach { (date, itemsForDate) ->
+                item {
+                    Text(
+                        text = date.format(formatter),
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
 
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row() {
-                Column() {
-                    Text("Planned")
-                    Text("")
-                }
-                Column() {
-                    Text("Spend")
-                    Text("")
-                }
-                Column() {
-                    Text("Planned")
-                    Text("$")
+                items(itemsForDate.sortedBy { it.exactTime }) { item ->
+                    Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                        Text(
+                            text = "${item.exactTime ?: "--:--"} - ${item.name}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        if (!item.description.isNullOrBlank()) {
+                            Text(
+                                text = item.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
                 }
             }
         }
-      }
+    }
+}
 
- }
+@Preview(showBackground = true)
+@Composable
+fun ItineraryContentPreview() {
+    ItineraryContent(
+        items = listOf(
+            ItineraryItem(id = 0, name = "Church of Monica", startDateTime = LocalDate.parse("2002-02-01").toString(), description = "best place", location = "here", exactTime = LocalDate.parse("2002-02-01").toString()),
+            ItineraryItem(id = 0, name = "Eiphel Tower", startDateTime = LocalDate.parse("2002-01-01").toString(), description = "love it", location = "here", exactTime = LocalDate.parse("2002-01-01").toString()),
+            ItineraryItem(id = 0, name = "Big Ban", startDateTime = LocalDate.parse("2002-01-01").toString(), description = "better at night", location = "here", exactTime = LocalDate.parse("2002-01-01").toString())
+        )
+    )
+}
 
 @Composable
-fun DocumentsContent(items: List<Document>) {
-    // TODO: Напиши список файлів, використовуючи state.documentsList
+fun ExpenseContent(
+    budget: Double,
+    list: List<Expense>,
+    onAddExpense: () -> Unit = {}
+    ) {
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddExpense) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add expense")
+            }
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp)
+            ) {
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth()
+                ) {
+                    val expensesSum = list.sumOf { it.amount }
+                    val remaining = budget - expensesSum;
+                    Column {
+                        Text(text = "Budget:", style = MaterialTheme.typography.labelSmall)
+                        Text(text = "%.2f".format(budget), style = MaterialTheme.typography.titleMedium)
+                    }
+                    Column {
+                        Text(text = "Expenses:", style = MaterialTheme.typography.labelSmall)
+                        Text(text =  "%.2f".format(expensesSum), style = MaterialTheme.typography.titleMedium)
+                    }
+                    Column {
+                        Text(text = "Remaining:", style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            text = "%.2f".format(remaining),
+                            color = if(remaining < 0) Color.Red else Color.Green,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+            }
+
+            items(list) { expense ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 7.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = expense.name,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+
+                        Text(
+                            text = "${expense.date}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+
+                        Text(
+                            text = "%.2f".format(expense.amount),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+            }
+
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ExpenseContentPreview() {
+    ExpenseContent(
+        budget =  600.00,
+        list = listOf(
+            Expense(tripId = 0, id = 1, name = "test", date = LocalDate.parse("2002-01-01"), amount = 100.00),
+            Expense(tripId = 0, id = 2, name = "test number 2", date = LocalDate.parse("2002-02-01"), amount = 100.00),
+            Expense(tripId = 0, id = 3, name = "test number 3", date = LocalDate.parse("2002-03-01"), amount = 100.00),
+            Expense(tripId = 0, id = 4, name = "test number 4", date = LocalDate.parse("2002-04-01"), amount = 100.00)
+        ),
+        onAddExpense = {}
+    )
+}
+
+@Composable
+fun DocumentsContent(
+    items: List<Document>,
+    onAddDocument: () -> Unit = {}
+) {
     Text(text = "Документів: ${items.size}", modifier = Modifier.padding(16.dp))
 }
 
@@ -190,7 +365,6 @@ fun DocumentsContent(items: List<Document>) {
 @Composable
 fun TripDetailsPreview() {
     val fakeState = TripDetailsUiState(
-        // Fixed: Changed date format from "dd/MM/yyyy" to ISO-8601 "yyyy-MM-dd" for LocalDate.parse
         trip = Trip(id = 1, title = "Відпустка у Парижі", destination = "Париж", startDate = LocalDate.parse("2025-02-02"), endDate = LocalDate.parse("2025-03-03")),
         isLoading = false
     )
@@ -199,6 +373,58 @@ fun TripDetailsPreview() {
         state = fakeState,
         tabIndex = 0,
         onTabClick = {},
+        onAddExpense = { _, _ ->},
+        onAddDocument = {},
         onTogglePackingItem = {}
     )
+}
+
+@Composable
+fun AddExpenseDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, Double) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var amount by remember { mutableIntStateOf(0) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Expense") },
+        text = {
+            Column (
+                verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                TextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Expense Name") }
+                )
+                OutlinedTextField(
+                    value = amount.toString(),
+                    onValueChange = { amount = it.toIntOrNull() ?: 0 },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                )
+            }
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(
+                onClick = {
+                    val amount = amount
+                    if (name.isNotBlank() && amount > 0) onConfirm(name, amount.toDouble())
+                }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddExpenseDialogPreview(){
+    AddExpenseDialog(onDismiss = {}, onConfirm = { _, _ ->})
 }

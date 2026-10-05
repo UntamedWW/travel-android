@@ -18,7 +18,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TravelRepositoryImpl @Inject constructor(
+class TravelRepositoryStub @Inject constructor(
     private val apiService: ApiService,
     private val dataStoreManager: DataStoreManager
 ) : TravelRepository {
@@ -35,15 +35,6 @@ class TravelRepositoryImpl @Inject constructor(
     override suspend fun getTrip(id: Long): Result<Trip> {
         return try {
             val response = apiService.getTrip(id)
-            Result.success(response.toDomain())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun addPackingItem(tripId: Long, item: PackingItemRequest): Result<PackingItem> {
-        return try {
-            val response = apiService.createPackingItem(item)
             Result.success(response.toDomain())
         } catch (e: Exception) {
             Result.failure(e)
@@ -139,6 +130,15 @@ class TravelRepositoryImpl @Inject constructor(
             } else {
                 Result.failure(Exception("Failed to delete trip"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addPackingItem(tripId: Long, item: PackingItemRequest): Result<PackingItem> {
+        return try {
+            val response = apiService.createPackingItem(item)
+            Result.success(response.toDomain())
         } catch (e: Exception) {
             Result.failure(e)
         }

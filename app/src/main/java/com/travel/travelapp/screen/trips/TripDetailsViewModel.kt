@@ -1,9 +1,10 @@
 package com.travel.travelapp.screen.trips
 
-import android.os.BugreportManager
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.travel.travelapp.data.remote.dto.DocumentRequest
+import com.travel.travelapp.data.remote.dto.ExpenseRequest
 import com.travel.travelapp.domain.model.Document
 import com.travel.travelapp.domain.model.Expense
 import com.travel.travelapp.domain.model.ItineraryItem
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 data class TripDetailsUiState(
@@ -181,18 +183,32 @@ class TripDetailsViewModel @Inject constructor(
 
     fun addExpense(name: String, amount: Double){
         viewModelScope.launch {
-            val newExpense = Expense(
-                id = 0L,
+            val newExpense = ExpenseRequest(
                 tripId = id,
                 name = name,
                 amount = amount,
-                date = java.time.LocalDate.now(),
+                date = LocalDate.now().toString(),
                 )
             val result = tripRepository.addExpense(tripId = id, newExpense)
 
             if(result.isSuccess) {
                 loadBudget()
             }
+        }
+    }
+
+    fun addDocument(document: Document) {
+        viewModelScope.launch {
+            val newDocument = DocumentRequest(
+                tripId = id,
+                name = document.name,
+                type = document.type,
+                url = document.url,
+                number = document.number,
+                expirationDate = LocalDate.parse(document.expirationDate).toString(),
+            )
+
+            val result = tripRepository.addDocument(newDocument)
         }
     }
 
@@ -221,15 +237,27 @@ class TripDetailsViewModel @Inject constructor(
         }
     }
 
+
+
     fun togglePackingItem(item: PackingItem) {
         viewModelScope.launch {
             val updatedItem = item.copy(packed = !item.packed)
-            val result = tripRepository.updatePackingItem(updatedItem)
+            val result = tripRepository.updatePackingItem(updatedItem.id, updatedItem)
 
-            if(result.isSuccess) {
+            result.onSuccess {
                 loadPackingList()
             }
+            .onFailure { exception ->
+                _uiState.update {
+                    it.copy(
+                        error = exception.message ?: "Unknown error",
+                        isLoading = false
+                    )
+                }
+            }
         }
+
+
     }
 }
 
