@@ -1,0 +1,155 @@
+package com.travel.travelapp.data.repository
+
+import com.travel.travelapp.data.local.DataStoreManager
+import com.travel.travelapp.data.mapper.toDomain
+import com.travel.travelapp.data.remote.ApiService
+import com.travel.travelapp.data.remote.dto.DocumentRequest
+import com.travel.travelapp.data.remote.dto.ExpenseRequest
+import com.travel.travelapp.data.remote.dto.PackingItemRequest
+import com.travel.travelapp.data.remote.dto.TripRequest
+import com.travel.travelapp.data.remote.dto.TripResponse
+import com.travel.travelapp.domain.model.Document
+import com.travel.travelapp.domain.model.Expense
+import com.travel.travelapp.domain.model.ItineraryItem
+import com.travel.travelapp.domain.model.PackingItem
+import com.travel.travelapp.domain.model.Trip
+import com.travel.travelapp.domain.repository.TravelRepository
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class TravelRepositoryStub @Inject constructor(
+    private val apiService: ApiService,
+    private val dataStoreManager: DataStoreManager
+) : TravelRepository {
+
+    override suspend fun getTrips(): Result<List<Trip>> {
+        return try {
+            val response = apiService.getTrips()
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getTrip(id: Long): Result<Trip> {
+        return try {
+            val response = apiService.getTrip(id)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getPackingList(tripId: Long): Result<List<PackingItem>> {
+        return try {
+            val response = apiService.getPackingItems(tripId)
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getItineraryList(tripId: Long): Result<List<ItineraryItem>> {
+        return try {
+            val response = apiService.getItineraryItemsByTrip(tripId)
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addDocument(document: DocumentRequest): Result<Document> {
+        return try {
+            val response = apiService.createDocument(document)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getDocumentsList(tripId: Long): Result<List<Document>> {
+        return try {
+            val response = apiService.getDocuments(tripId)
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getPlannedBudget(tripId: Long): Result<Double> {
+        return try {
+            val response = apiService.getTrip(tripId)
+            Result.success(response.plannedBudget)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getExpensesList(tripId: Long): Result<List<Expense>> {
+        return try {
+            val response = apiService.getExpenses(tripId)
+            Result.success(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addExpense(tripId: Long, expense: ExpenseRequest): Result<Unit> {
+        return try {
+            apiService.createExpense(expense)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun createTrip(trip: TripRequest): Result<Trip> {
+        return try {
+            val response = apiService.createTrip(trip)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateTrip(id: Long, trip: TripRequest): Result<Trip> {
+        return try {
+            val response = apiService.updateTrip(id, trip)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteTrip(id: Long): Result<Unit> {
+        return try {
+            val response = apiService.deleteTrip(id)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to delete trip"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addPackingItem(tripId: Long, item: PackingItemRequest): Result<PackingItem> {
+        return try {
+            val response = apiService.createPackingItem(item)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updatePackingItem(id: Long, item: PackingItem): Result<Unit> {
+        return try {
+            apiService.updatePackingItem(id, item)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}

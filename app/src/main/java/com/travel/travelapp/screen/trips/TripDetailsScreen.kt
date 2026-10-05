@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,20 +22,24 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,8 +70,8 @@ fun TripDetailsScreen(
         onTogglePackingItem = { item -> 
             viewModel.togglePackingItem(item)
         },
-        onAddExpense = { item ->
-            viewModel.addExpense(item.name, item.amount)
+        onAddExpense = { name, amount ->
+            viewModel.addExpense(name, amount)
         },
         onAddDocument = { item ->
             viewModel.addDocument(item)
@@ -80,9 +86,21 @@ fun TripDetailsContent(
     tabIndex: Int,
     onTabClick: (Int) -> Unit,
     onTogglePackingItem: (PackingItem) -> Unit,
-    onAddExpense: (Expense) -> Unit = {},
-    onAddDocument: (Document) -> Unit = {}
+    onAddExpense: (String, Double) -> Unit,
+    onAddDocument: (Document) -> Unit
 ) {
+
+    var showExpenseDialog by remember { mutableStateOf(false) }
+
+    if (showExpenseDialog) {
+        AddExpenseDialog(
+            onDismiss = {showExpenseDialog = false},
+            onConfirm = { name, amount ->
+                onAddExpense(name, amount)
+                showExpenseDialog = false
+            }
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -120,8 +138,8 @@ fun TripDetailsContent(
                         0 -> PackingListContent(state.packingList, onTogglePackingItem)
                         1 -> ItineraryContent(state.itineraryList)
                         2 -> ExpenseContent(
-                            state.plannedBudget, state.expensesList, onAddExpense)
-                        3 -> DocumentsContent(state.documentsList, onAddDocument)
+                            state.plannedBudget, state.expensesList, onAddExpense = { showExpenseDialog = true })
+                        3 -> DocumentsContent(state.documentsList, onAddDocument = {})
                     }
                 }
             }
@@ -355,6 +373,58 @@ fun TripDetailsPreview() {
         state = fakeState,
         tabIndex = 0,
         onTabClick = {},
+        onAddExpense = { _, _ ->},
+        onAddDocument = {},
         onTogglePackingItem = {}
     )
+}
+
+@Composable
+fun AddExpenseDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, Double) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var amount by remember { mutableIntStateOf(0) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Expense") },
+        text = {
+            Column (
+                verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                TextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Expense Name") }
+                )
+                OutlinedTextField(
+                    value = amount.toString(),
+                    onValueChange = { amount = it.toIntOrNull() ?: 0 },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                )
+            }
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(
+                onClick = {
+                    val amount = amount
+                    if (name.isNotBlank() && amount > 0) onConfirm(name, amount.toDouble())
+                }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddExpenseDialogPreview(){
+    AddExpenseDialog(onDismiss = {}, onConfirm = { _, _ ->})
 }

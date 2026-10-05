@@ -21,7 +21,9 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTravelRepository(
-        travelRepositoryImpl: TravelRepositoryImpl
+        //travelRepositoryImpl: TravelRepositoryImpl
+        travelRepositoryStub: TravelRepositoryStub
+
     ): TravelRepository
 
     @Binds
